@@ -2,10 +2,13 @@
 use crate::command::Command;
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 use embedded_graphics::{
+    draw_target::DrawTarget,
+    geometry::OriginDimensions,
+    geometry::Size,
     pixelcolor::{
-        raw::{RawData, RawU16,}, Rgb565,
+        raw::{RawData, RawU16},
+        Rgb565,
     },
-    draw_target::DrawTarget, geometry::OriginDimensions, geometry::Size, 
     Pixel,
 };
 use embedded_hal::blocking::delay::DelayMs;
@@ -22,6 +25,26 @@ const BUFFER_SIZE: usize = DISPLAY_WIDTH * DISPLAY_HEIGHT * 2;
 pub struct Ssd1351<DI> {
     display: DI,
     buffer: [u8; BUFFER_SIZE],
+}
+
+impl<DI> Ssd1351<DI> {
+    ///  Draw the byte arrat
+    pub fn draw(&mut self, bytes: &[u8]) {
+        let coef_big;
+        let coef_little;
+        if cfg!(target_endian = "big") {
+            coef_little = 0;
+            coef_big = 1;
+        } else {
+            coef_little = 1;
+            coef_big = 0;
+        }
+
+        for i in (0..BUFFER_SIZE - 1).step_by(2) {
+            self.buffer[i] = bytes[i + coef_little];
+            self.buffer[i + 1] = bytes[i + coef_big];
+        }
+    }
 }
 
 impl<DI: WriteOnlyDataCommand> Ssd1351<DI> {
@@ -84,7 +107,6 @@ impl<DI: WriteOnlyDataCommand> Ssd1351<DI> {
         Ok(())
     }
 
-
     /// Turns off the display.
     pub fn turn_off(&mut self) -> Result<(), DisplayError> {
         self.send_command(Command::DisplayOff)?;
@@ -113,9 +135,10 @@ impl<DI: WriteOnlyDataCommand> Ssd1351<DI> {
     }
 }
 
-impl<DI> DrawTarget for Ssd1351<DI> 
+impl<DI> DrawTarget for Ssd1351<DI>
 where
-DI: WriteOnlyDataCommand{
+    DI: WriteOnlyDataCommand,
+{
     type Color = Rgb565;
     type Error = DisplayError;
 
@@ -123,16 +146,13 @@ DI: WriteOnlyDataCommand{
     where
         I: IntoIterator<Item = Pixel<Self::Color>>,
     {
-        pixels
-            .into_iter()
-            .for_each(|Pixel(point, colour_pixel)| {
-                let colour_u16 = RawU16::from(colour_pixel).into_inner();
-                let colour = [(colour_u16 >> 8) as u8, colour_u16 as u8];
-                let idx: usize = ((point.x + point.y * 128) * 2) as usize;
-                self.buffer[idx] = colour[0];
-                self.buffer[idx + 1] = colour[1];
-            
-            });
+        pixels.into_iter().for_each(|Pixel(point, colour_pixel)| {
+            let colour_u16 = RawU16::from(colour_pixel).into_inner();
+            let colour = [(colour_u16 >> 8) as u8, colour_u16 as u8];
+            let idx: usize = ((point.x + point.y * 128) * 2) as usize;
+            self.buffer[idx] = colour[0];
+            self.buffer[idx + 1] = colour[1];
+        });
 
         Ok(())
     }
