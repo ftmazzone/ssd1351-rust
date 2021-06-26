@@ -18,10 +18,8 @@ use  ssd1351;
 
 fn main() {
     // Configure gpio
-    //let spi = Spi::new(Bus::Spi0, SlaveSelect::Ss0, 16_000_000, Mode::Mode0).unwrap();
     let spi = Spi::new(Bus::Spi0, SlaveSelect::Ss0, 19660800, Mode::Mode0).unwrap();
     let gpio = Gpio::new().unwrap();
-    //let cs = gpio.get(8).unwrap().into_output();
     let dc = gpio.get(24).unwrap().into_output();
     let mut rst = gpio.get(25).unwrap().into_output();
 
