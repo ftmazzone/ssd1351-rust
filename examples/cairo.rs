@@ -16,7 +16,7 @@ const DISPLAY_WIDTH: f64 = 128.0;
 const DISPLAY_HEIGHT: f64 = 128.0;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
- 
+    
     let sleep_duration = time::Duration::from_secs(30);
 
     // Configure gpio
@@ -78,7 +78,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         cairo::FontWeight::Normal,
     );
     context.set_font_size(90.0);
-    context.set_source_rgb(0.0, 0.0, 1.0);
+    let (r, g, b) = convert_hex_colour_to_rgb("#FF530D".to_string())?;
+    context.set_source_rgb(r / 255.0, g / 255.0, b / 255.0);
 
     let weather_icon_char = '\u{f051}'.to_string();
     let text_extent = context.text_extents(&weather_icon_char)?;
@@ -104,4 +105,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     disp.turn_off();
 
     Ok(())
+}
+
+/// Convert from the HEX color model to the RGB color model.
+pub fn convert_hex_colour_to_rgb(
+    hexcolour: String,
+) -> Result<(f64, f64, f64), std::num::ParseIntError> {
+    let increment;
+    let r: f64;
+    let g: f64;
+    let b: f64;
+
+    if hexcolour.chars().count() == 7 {
+        increment = 1;
+    } else {
+        increment = 0;
+    }
+
+    let r_string: String = hexcolour.chars().skip(increment).take(2).collect();
+    let g_string: String = hexcolour.chars().skip(increment + 2).take(2).collect();
+    let b_string: String = hexcolour.chars().skip(increment + 4).take(2).collect();
+
+    r = i64::from_str_radix(&r_string, 16)? as f64;
+    g = i64::from_str_radix(&g_string, 16)? as f64;
+    b = i64::from_str_radix(&b_string, 16)? as f64;
+
+    Ok((r, g, b))
 }

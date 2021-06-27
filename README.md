@@ -1,5 +1,7 @@
 # ssd1351
 
+Sample code to run the SSD1351 oled display with the [cairo-rs](https://crates.io/crates/cairo-rs) or [embedded-graphics](https://crates.io/crates/embedded-graphics) libraries. 
+
 ## Prerequisites
 
 - Install the weather themed icons.
