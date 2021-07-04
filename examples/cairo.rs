@@ -1,14 +1,11 @@
 use cairo::{Context, Format, ImageSurface};
 use std::fs::File;
 use std::{thread, time};
-use {
-    display_interface_spi::SPIInterfaceNoCS,
-    linux_embedded_hal::Delay,
+use 
     rppal::{
         gpio::Gpio,
         spi::{Bus, Mode, SlaveSelect, Spi},
-    },
-};
+    };
 
 use ssd1351;
 
@@ -23,14 +20,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let spi = Spi::new(Bus::Spi0, SlaveSelect::Ss0, 19660800, Mode::Mode0).unwrap();
     let gpio = Gpio::new().unwrap();
     let dc = gpio.get(24).unwrap().into_output();
-    let mut rst = gpio.get(25).unwrap().into_output();
+    let  rst = gpio.get(25).unwrap().into_output();
 
-    // Init SPI
-    let spii = SPIInterfaceNoCS::new(spi, dc);
-    let mut disp = ssd1351::display::Ssd1351::new(spii);
+    // Init the display
+    let mut disp = ssd1351::simple_display::display::Ssd1351::new(spi,dc,rst);
 
     // Reset & init
-    disp.reset(&mut rst, &mut Delay).unwrap();
+    disp.reset().unwrap();
     disp.turn_on().unwrap();
 
     // Initialise cairo
@@ -60,10 +56,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Couldn’t write to png");
 
     drop(context);
-    let mut data = surface.data()?;
-    disp.draw(&data);
+    let  data = surface.data()?;
+    disp.update_buffer(&data);
     drop(data);
-    disp.flush();
+    disp.flush()?;
 
     thread::sleep(sleep_duration);
 
@@ -95,14 +91,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Couldn’t write to png");
 
     drop(context);
-    let mut data = surface.data()?;
-    disp.draw(&data);
+    let  data = surface.data()?;
+    disp.update_buffer(&data);
     drop(data);
-    disp.flush();
+    disp.flush()?;
 
     thread::sleep(sleep_duration);
 
-    disp.turn_off();
+    disp.turn_off()?;
 
     Ok(())
 }

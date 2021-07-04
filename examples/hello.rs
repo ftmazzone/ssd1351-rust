@@ -14,7 +14,7 @@ use embedded_graphics::{
     text::{Alignment, Text},
 };
 use std::{thread, time::Duration};
-use  ssd1351;
+use ssd1351;
 
 fn main() {
     // Configure gpio
@@ -25,7 +25,7 @@ fn main() {
 
     // Init SPI
     let spii = SPIInterfaceNoCS::new(spi, dc);
-    let mut disp = ssd1351::display::Ssd1351::new(spii);
+    let mut disp = ssd1351::display::display::Ssd1351::new(spii);
 
     // Reset & init
     disp.reset(&mut rst, &mut Delay).unwrap();

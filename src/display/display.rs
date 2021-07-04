@@ -1,5 +1,5 @@
 //! main display module
-use crate::command::Command;
+use crate::display::command::Command;
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 use embedded_graphics::{
     draw_target::DrawTarget,
@@ -16,7 +16,6 @@ use embedded_hal::digital::v2::OutputPin;
 
 const DISPLAY_WIDTH: usize = 128;
 const DISPLAY_HEIGHT: usize = 128;
-//const BUFFER_SIZE: usize = DISPLAY_WIDTH * DISPLAY_HEIGHT * 4 / 8;
 const BUFFER_SIZE: usize = DISPLAY_WIDTH * DISPLAY_HEIGHT * 2;
 
 /// Represents the SSD1351 Display.
@@ -27,25 +26,6 @@ pub struct Ssd1351<DI> {
     buffer: [u8; BUFFER_SIZE],
 }
 
-impl<DI> Ssd1351<DI> {
-    ///  Draw the byte arrat
-    pub fn draw(&mut self, bytes: &[u8]) {
-        let coef_big;
-        let coef_little;
-        if cfg!(target_endian = "big") {
-            coef_little = 0;
-            coef_big = 1;
-        } else {
-            coef_little = 1;
-            coef_big = 0;
-        }
-
-        for i in (0..BUFFER_SIZE - 1).step_by(2) {
-            self.buffer[i] = bytes[i + coef_little];
-            self.buffer[i + 1] = bytes[i + coef_big];
-        }
-    }
-}
 
 impl<DI: WriteOnlyDataCommand> Ssd1351<DI> {
     /// Creates the SSD1351 Display.
