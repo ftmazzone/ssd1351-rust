@@ -3,6 +3,13 @@ name = "ssd1351"
 version = "0.3.0"
 authors = ["Florent Mazzone"]
 edition = "2018"
+repository = "https://gitlab.com/ftmazzone/ssd1351-rust.git"
+include = [
+    "/src",
+    "/Cargo.*",
+    "/LICENSE*",
+    "/*.md",
+]
 
 [dependencies]
 display-interface = "0.4"
@@ -10,9 +17,7 @@ embedded-graphics = "0.7"
 embedded-hal = "0.2"
 chrono="0.4"
 simple-signal="1"
-
 rppal = { version = "0.12", features = [ "hal" ] }
 display-interface-spi = "0.4"
 linux-embedded-hal = "0.3"
 cairo-rs = { version = "0.14", features = ["png"] }
-
