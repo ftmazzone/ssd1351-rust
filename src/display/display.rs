@@ -129,7 +129,12 @@ where
         pixels.into_iter().for_each(|Pixel(point, colour_pixel)| {
             let colour_u16 = RawU16::from(colour_pixel).into_inner();
             let colour = [(colour_u16 >> 8) as u8, colour_u16 as u8];
-            let idx: usize = ((point.x + point.y * 128) * 2) as usize;
+            let idx = (point.x + point.y * 128) * 2;
+            // ignore out-of-bounds drawing
+            if idx < 0 || idx >= self.buffer.len() as i32 {
+                return;
+            }
+            let idx = idx as usize;
             self.buffer[idx] = colour[0];
             self.buffer[idx + 1] = colour[1];
         });
